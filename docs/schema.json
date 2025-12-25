@@ -1,0 +1,422 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/owasp/agentic-security-dataset/schema.json",
+  "title": "OWASP Agentic Security Dataset",
+  "description": "Schema for the OWASP Top 10 for Agentic Applications 2026 dataset",
+  "type": "object",
+  "required": ["metadata", "entries", "mappings", "nhi_mappings", "related_frameworks", "exploits_tracker"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Dataset metadata and provenance information",
+      "required": ["title", "version", "release_date", "source", "license", "website", "generated_at", "description"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full document title"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d{4}$",
+          "description": "Year-based version identifier (e.g., '2026')"
+        },
+        "release_date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}$",
+          "description": "Release month in YYYY-MM format"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Authoring organization"
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "License identifier (e.g., 'CC BY-SA 4.0')"
+        },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "description": "Source website URL"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of data generation"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Brief description of the dataset"
+        }
+      },
+      "additionalProperties": false
+    },
+    "entries": {
+      "type": "array",
+      "description": "Array of 10 ASI (Agentic Security Issue) entries",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/definitions/Entry"
+      }
+    },
+    "mappings": {
+      "$ref": "#/definitions/MappingsContainer"
+    },
+    "nhi_mappings": {
+      "$ref": "#/definitions/NHIMappings"
+    },
+    "related_frameworks": {
+      "$ref": "#/definitions/RelatedFrameworks"
+    },
+    "exploits_tracker": {
+      "$ref": "#/definitions/ExploitsTracker"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "Entry": {
+      "type": "object",
+      "description": "A single ASI (Agentic Security Issue) entry",
+      "required": [
+        "id",
+        "title",
+        "description",
+        "related_threats",
+        "related_llm_entries",
+        "aivss_core_risk",
+        "common_examples",
+        "attack_scenarios",
+        "mitigations",
+        "references"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^ASI(0[1-9]|10)$",
+          "description": "Unique identifier (ASI01 through ASI10)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Short threat title"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Detailed threat description"
+        },
+        "related_threats": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Related T-codes from OWASP Agentic Threats document"
+        },
+        "related_llm_entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Related OWASP LLM Top 10 entries (e.g., 'LLM01:2025 Prompt Injection')"
+        },
+        "aivss_core_risk": {
+          "type": "string",
+          "minLength": 1,
+          "description": "AIVSS risk category"
+        },
+        "common_examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Common vulnerability examples"
+        },
+        "attack_scenarios": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/AttackScenario"
+          },
+          "description": "Documented attack scenarios"
+        },
+        "mitigations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Prevention and mitigation guidelines"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reference"
+          },
+          "description": "External references"
+        }
+      },
+      "additionalProperties": false
+    },
+    "AttackScenario": {
+      "type": "object",
+      "description": "A documented attack scenario",
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Scenario name or identifier"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full scenario description"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Reference": {
+      "type": "object",
+      "description": "An external reference",
+      "required": ["title", "url"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reference title"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Reference URL"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MappingsContainer": {
+      "type": "object",
+      "description": "Container for cross-framework mappings",
+      "required": ["description", "matrix"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of the mapping matrix"
+        },
+        "matrix": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/definitions/MappingEntry"
+          },
+          "description": "Array of ASI to framework mappings"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MappingEntry": {
+      "type": "object",
+      "description": "Cross-framework mapping for an ASI entry",
+      "required": ["asi_id", "llm_top10", "threats_mitigations", "aivss_core_risk"],
+      "properties": {
+        "asi_id": {
+          "type": "string",
+          "pattern": "^ASI(0[1-9]|10)$",
+          "description": "ASI entry ID"
+        },
+        "llm_top10": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Related OWASP LLM Top 10 entries"
+        },
+        "threats_mitigations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Related threat codes (T-codes) from Agentic Threats document"
+        },
+        "aivss_core_risk": {
+          "type": "string",
+          "minLength": 1,
+          "description": "AIVSS core risk category"
+        }
+      },
+      "additionalProperties": false
+    },
+    "NHIMappings": {
+      "type": "object",
+      "description": "Non-Human Identities (NHI) Top 10 mappings",
+      "required": ["description", "mappings"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of NHI mappings"
+        },
+        "mappings": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/definitions/NHIMappingEntry"
+          },
+          "description": "Individual NHI to ASI mappings"
+        }
+      },
+      "additionalProperties": false
+    },
+    "NHIMappingEntry": {
+      "type": "object",
+      "description": "Individual NHI to ASI mapping entry",
+      "required": ["nhi_id", "nhi_title", "description", "asi_mappings", "threats", "aivss"],
+      "properties": {
+        "nhi_id": {
+          "type": "string",
+          "pattern": "^NHI([1-9]|10)$",
+          "description": "NHI entry ID (NHI1 through NHI10)"
+        },
+        "nhi_title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "NHI entry title"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Mapping description/rationale"
+        },
+        "asi_mappings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Related ASI entries with descriptions"
+        },
+        "threats": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Related threat codes"
+        },
+        "aivss": {
+          "type": "string",
+          "minLength": 1,
+          "description": "AIVSS risk category"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RelatedFrameworks": {
+      "type": "object",
+      "description": "References to related security frameworks",
+      "properties": {
+        "owasp_llm_top10": {
+          "type": "object",
+          "properties": {
+            "version": { "type": "string" },
+            "url": { "type": "string", "format": "uri" }
+          }
+        },
+        "agentic_threats_mitigations": {
+          "type": "object",
+          "properties": {
+            "version": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        },
+        "aivss": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        },
+        "cyclonedx": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "ExploitsTracker": {
+      "type": "object",
+      "description": "Real-world security incidents tracker",
+      "required": ["description", "incidents"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tracker description"
+        },
+        "incidents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Incident"
+          },
+          "description": "Array of tracked incidents"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Incident": {
+      "type": "object",
+      "description": "A documented real-world security incident",
+      "required": ["name", "date", "description", "related_asi", "source"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incident name or identifier"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}$",
+          "description": "Discovery/disclosure date in YYYY-MM format"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Incident description"
+        },
+        "related_asi": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^ASI(0[1-9]|10)$"
+          },
+          "description": "Related ASI entry IDs"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri",
+          "description": "Source/reference URL"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

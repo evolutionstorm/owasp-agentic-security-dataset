@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "title": "OWASP Top 10 for Agentic Applications 2026",
+    "version": "2026",
+    "release_date": "2025-12",
+    "source": "OWASP GenAI Security Project - Agentic Security Initiative",
+    "license": "CC BY-SA 4.0",
+    "website": "https://genai.owasp.org",
+    "generated_at": "2025-12-24T07:47:21.828385Z",
+    "description": "The OWASP Top 10 for Agentic Applications serves as a compass and go-to reference for security leaders and practitioners to understand and address the Top 10 highest-impact threats for agentic AI systems."
+  },
+  "entries": [
+    {
+      "id": "ASI01",
+      "title": "Agent Goal Hijack",
+      "description": "AI Agents exhibit autonomous ability to execute a series of tasks to achieve a goal. Due to inherent weaknesses in how natural-language instructions and related content are processed, agents and the u...",
+      "related_llm_entries": [
+        "LLM01:2025 Prompt Injection",
+        "LLM06:2025 Excessive Agency"
+      ],
+      "aivss_core_risk": "Agent Goal & Instruction Manipulation",
+      "mitigation_count": 9,
+      "attack_scenario_count": 4
+    },
+    {
+      "id": "ASI02",
+      "title": "Tool Misuse and Exploitation",
+      "description": "Agents can misuse legitimate tools due to prompt injection, misalignment, or unsafe delegation or ambiguous instruction - leading to data exfiltration, tool output manipulation or workflow hijacking. ...",
+      "related_llm_entries": [
+        "LLM06:2025 Excessive Agency"
+      ],
+      "aivss_core_risk": "Agentic AI Tool Misuse",
+      "mitigation_count": 8,
+      "attack_scenario_count": 7
+    },
+    {
+      "id": "ASI03",
+      "title": "Identity and Privilege Abuse",
+      "description": "Identity & Privilege Abuse exploits dynamic trust and delegation in agents to escalate access and bypass controls by manipulating delegation chains, role inheritance, control flows, and agent context....",
+      "related_llm_entries": [
+        "LLM01:2025 Prompt Injection",
+        "LLM06:2025 Excessive Agency",
+        "LLM02:2025 Sensitive Information Disclosure"
+      ],
+      "aivss_core_risk": "Agent Access Control Violation",
+      "mitigation_count": 9,
+      "attack_scenario_count": 6
+    },
+    {
+      "id": "ASI04",
+      "title": "Agentic Supply Chain Vulnerabilities",
+      "description": "Agentic Supply Chain Vulnerabilities arise when agents, tools, and related artefacts they work with are provided by third parties and may be malicious, compromised, or tampered with in transit. Unlike...",
+      "related_llm_entries": [
+        "LLM03:2025 Supply Chain Vulnerabilities"
+      ],
+      "aivss_core_risk": "Agent Supply Chain & Dependency Attacks",
+      "mitigation_count": 9,
+      "attack_scenario_count": 6
+    },
+    {
+      "id": "ASI05",
+      "title": "Unexpected Code Execution (RCE)",
+      "description": "Agentic systems - including popular vibe coding tools - often generate and execute code. Attackers exploit code-generation features or embedded tool access to escalate actions into remote code executi...",
+      "related_llm_entries": [
+        "LLM01:2025 Prompt Injection",
+        "LLM05:2025 Improper Output Handling"
+      ],
+      "aivss_core_risk": "Insecure Agent Critical Systems Interaction",
+      "mitigation_count": 7,
+      "attack_scenario_count": 8
+    },
+    {
+      "id": "ASI06",
+      "title": "Memory & Context Poisoning",
+      "description": "Agentic systems rely on stored and retrievable information which can be a snapshot of its conversation history, a memory tool or expanded context, which supports continuity across tasks and reasoning ...",
+      "related_llm_entries": [
+        "LLM01:2025 Prompt Injection",
+        "LLM04:2025 Data and Model Poisoning",
+        "LLM08:2025 Vector and Embedding Weaknesses"
+      ],
+      "aivss_core_risk": "Memory Use & Contextual Awareness",
+      "mitigation_count": 9,
+      "attack_scenario_count": 6
+    },
+    {
+      "id": "ASI07",
+      "title": "Insecure Inter-Agent Communication",
+      "description": "Multi agent systems depend on continuous communication between autonomous agents that coordinate via APIs, message buses, and shared memory, significantly expanding the attack surface. Insecure Inter-...",
+      "related_llm_entries": [
+        "LLM02:2025 Sensitive Information Disclosure",
+        "LLM06:2025 Excessive Agency"
+      ],
+      "aivss_core_risk": "Agent Memory & Context Manipulation",
+      "mitigation_count": 9,
+      "attack_scenario_count": 7
+    },
+    {
+      "id": "ASI08",
+      "title": "Cascading Failures",
+      "description": "Agentic cascading failures occur when a single fault (hallucination, malicious input, corrupted tool, or poisoned memory) propagates across autonomous agents, compounding into system-wide harm. Becaus...",
+      "related_llm_entries": [
+        "LLM01:2025 Prompt Injection",
+        "LLM04:2025 Data and Model Poisoning",
+        "LLM06:2025 Excessive Agency"
+      ],
+      "aivss_core_risk": "Agent Cascading Failures",
+      "mitigation_count": 10,
+      "attack_scenario_count": 8
+    },
+    {
+      "id": "ASI09",
+      "title": "Human-Agent Trust Exploitation",
+      "description": "Intelligent agents can establish strong trust with human users through their natural language fluency, emotional intelligence, and perceived expertise (anthropomorphism). Adversaries or misaligned des...",
+      "related_llm_entries": [
+        "LLM01:2025 Prompt Injection",
+        "LLM05:2025 Improper Output Handling",
+        "LLM06:2025 Excessive Agency",
+        "LLM09:2025 Misinformation"
+      ],
+      "aivss_core_risk": "Agent Untraceability / Human Manipulation",
+      "mitigation_count": 9,
+      "attack_scenario_count": 8
+    },
+    {
+      "id": "ASI10",
+      "title": "Rogue Agents",
+      "description": "Rogue Agents are malicious or compromised AI Agents that deviate from their intended function or authorized scope, acting harmfully, deceptively, or parasitically within multi-agent or human-agent eco...",
+      "related_llm_entries": [
+        "LLM02:2025 Sensitive Information Disclosure",
+        "LLM09:2025 Misinformation"
+      ],
+      "aivss_core_risk": "Behavioral Integrity (BI), Operational Security (OS), Compliance Violations (CV)",
+      "mitigation_count": 7,
+      "attack_scenario_count": 4
+    }
+  ]
+}

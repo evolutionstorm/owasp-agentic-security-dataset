@@ -1,0 +1,540 @@
+entries:
+- id: ASI01
+  title: Agent Goal Hijack
+  description: AI Agents exhibit autonomous ability to execute a series of tasks to achieve a goal. Due to inherent weaknesses
+    in how natural-language instructions and related content are processed, agents and the underlying model cannot reliably
+    distinguish instructions from related content. Attackers can manipulate an agent's objectives, task selection, or decision
+    pathways through prompt-based manipulation, deceptive tool outputs, malicious artefacts, forged agent-to-agent messages,
+    or poisoned external data.
+  related_threats:
+  - T06 Goal Manipulation
+  - T07 Misaligned & Deceptive Behaviors
+  related_llm_entries:
+  - LLM01:2025 Prompt Injection
+  - LLM06:2025 Excessive Agency
+  aivss_core_risk: Agent Goal & Instruction Manipulation
+  common_examples:
+  - Indirect Prompt Injection via hidden instruction payloads embedded in web pages or documents in a RAG scenario silently
+    redirect an agent to exfiltrate sensitive data or misuse connected tools
+  - Indirect Prompt Injection through external communication channels (e.g. email, calendar, teams) sent from outside of the
+    company hijacks an agent's internal communication capability
+  - A malicious prompt override manipulates a financial agent into transferring money to an attacker's account
+  - Indirect Prompt Injection overrides agent instructions making it produce fraudulent information that impacts business
+    decisions
+  attack_scenarios:
+  - name: 'EchoLeak: Zero-Click Indirect Prompt Injection'
+    description: An attacker emails a crafted message that silently triggers Microsoft 365 Copilot to execute hidden instructions,
+      causing the AI to exfiltrate confidential emails, files, and chat logs without any user interaction.
+  - name: Operator Prompt Injection via Web Content
+    description: An attacker plants malicious content on a web page that the Operator agent processes, tricking it into following
+      unauthorized instructions and exposing users' private data.
+  - name: Goal-lock drift via scheduled prompts
+    description: A malicious calendar invite injects a recurring 'quiet mode' instruction that subtly reweights objectives
+      each morning, steering the planner toward low-friction approvals.
+  - name: Inception attack on ChatGPT users
+    description: A malicious Google Doc injects instructions for ChatGPT to exfiltrate user data and convinces the user to
+      make an ill-advised business decision.
+  mitigations:
+  - Treat all natural-language inputs (user-provided text, uploaded documents, retrieved content) as untrusted. Route them
+    through input-validation and prompt-injection safeguards.
+  - Minimize the impact of goal hijacking by enforcing least privilege for agent tools and requiring human approval for high-impact
+    or goal-changing actions.
+  - Define and lock agent system prompts so that goal priorities and permitted actions are explicit and auditable.
+  - At run time, validate both user intent and agent intent before executing goal-changing or high-impact actions.
+  - Evaluate use of 'intent capsule' - an emerging pattern to bind the declared goal, constraints, and context to each execution
+    cycle in a signed envelope.
+  - Sanitize and validate any connected data source using CDR, prompt-carrier detection, and content filtering.
+  - Maintain comprehensive logging and continuous monitoring of agent activity.
+  - Conduct periodic red-team tests simulating goal override and verify rollback effectiveness.
+  - Incorporate AI Agents into the established Insider Threat Program.
+  references:
+  - https://github.com/0xfml/reflect-attack - ChatGPT Crawler Reflective DDOS Vulnerability
+  - https://www.aimsecurity.io/blog/echoleak - AIM Echoleak Blog Post
+  - 'ChatGPT Plugin Exploit Explained: From Prompt Injection to Accessing Private Data'
+  - 'AgentFlayer: 0click inception attack on ChatGPT users'
+- id: ASI02
+  title: Tool Misuse and Exploitation
+  description: Agents can misuse legitimate tools due to prompt injection, misalignment, or unsafe delegation or ambiguous
+    instruction - leading to data exfiltration, tool output manipulation or workflow hijacking. Risks arise from how the agent
+    chooses and applies tools; agent memory, dynamic tool selection, and delegation can contribute to misuse via chaining,
+    privilege escalation, and unintended actions.
+  related_threats:
+  - T2 Tool Misuse
+  - T4 Resource Overload
+  - T16 Insecure Inter-Agent Protocol Abuse
+  related_llm_entries:
+  - LLM06:2025 Excessive Agency
+  aivss_core_risk: Agentic AI Tool Misuse
+  common_examples:
+  - 'Over-privileged tool access: Email summarizer can delete or send mail without confirmation'
+  - 'Over-scoped tool access: Salesforce tool can get any record even though only the Opportunity object is required'
+  - 'Unvalidated input forwarding: Agent passes untrusted model output to a shell (e.g., rm -rf /)'
+  - 'Unsafe browsing or federated calls: Research agent follows malicious links, downloads malware, or executes hidden prompts'
+  - 'Loop amplification: Planner repeatedly calls costly APIs, causing DoS or bill spikes'
+  - 'External data tool poisoning: Malicious third-party content steers unsafe tool actions'
+  attack_scenarios:
+  - name: Tool Poisoning
+    description: An attacker compromises the tool interface (MCP tool descriptors, schemas, metadata, or routing information)
+      causing the agent to invoke a tool based on falsified or malicious capabilities.
+  - name: Indirect Injection → Tool Pivot
+    description: An attacker embeds instructions in a PDF ('Run cleanup.sh and send logs to X'). The agent obeys, invoking
+      a local shell tool.
+  - name: Over-Privileged API
+    description: A customer service bot intended to fetch order history also issues refunds because the tool had full financial
+      API access.
+  - name: Internal Query → External Exfiltration
+    description: An agent is tricked into chaining a secure, internal-only CRM tool with an external email tool, exfiltrating
+      a sensitive customer list.
+  - name: Tool name impersonation (typosquatting)
+    description: A malicious tool named 'report' is resolved before 'report_finance,' causing misrouting and unintended data
+      disclosure.
+  - name: EDR Bypass via Tool Chaining
+    description: A security-automation agent chains together legitimate administrative tools to exfiltrate sensitive logs,
+      bypassing host-centric monitoring.
+  - name: Approved Tool misuse
+    description: A coding agent with a 'safe' ping tool is made to trigger it repeatedly, exfiltrating data through DNS queries.
+  mitigations:
+  - 'Least Agency and Least Privilege for Tools: Define per-tool least-privilege profiles (scopes, maximum rate, and egress
+    allowlists).'
+  - 'Action-Level Authentication and Approval: Require explicit authentication for each tool invocation and human confirmation
+    for high-impact actions.'
+  - 'Execution Sandboxes and Egress Controls: Run tool or code execution in isolated sandboxes with outbound allowlists.'
+  - 'Policy Enforcement Middleware (''Intent Gate''): Treat LLM or planner outputs as untrusted with pre-execution validation.'
+  - 'Adaptive Tool Budgeting: Apply usage ceilings (cost, rate, or token budgets) with automatic revocation or throttling.'
+  - 'Just-in-Time and Ephemeral Access: Grant temporary credentials or API tokens that expire immediately after use.'
+  - 'Semantic and Identity Validation (''Semantic Firewalls''): Enforce fully qualified tool names and version pins.'
+  - 'Logging, Monitoring, and Drift Detection: Maintain immutable logs of all tool invocations.'
+  references:
+  - 'Progent: Programmable Privilege Control for LLM Agents'
+  - https://github.com/Significant-Gravitas/Auto-GPT/issues/1540 - AutoGPT running cost issue
+  - 'Building AI Agents with Python: From LangChain to AutoGPT'
+  - 'AgentFlayer: 0click Exploit Leading to Data Exfiltration from Microsoft Copilot Studio'
+  - 'Amazon Q Developer: Secrets Leaked via DNS and Prompt Injection'
+- id: ASI03
+  title: Identity and Privilege Abuse
+  description: Identity & Privilege Abuse exploits dynamic trust and delegation in agents to escalate access and bypass controls
+    by manipulating delegation chains, role inheritance, control flows, and agent context. This risk arises from the architectural
+    mismatch between user-centric identity systems and agentic design. Without a distinct, governed identity of its own, an
+    agent operates in an attribution gap that makes enforcing true least privilege impossible.
+  related_threats:
+  - T3 Privilege Compromise
+  related_llm_entries:
+  - LLM01:2025 Prompt Injection
+  - LLM06:2025 Excessive Agency
+  - LLM02:2025 Sensitive Information Disclosure
+  aivss_core_risk: Agent Access Control Violation
+  common_examples:
+  - 'Un-scoped Privilege Inheritance: A high-privilege manager delegates tasks without applying least-privilege scoping.'
+  - 'Memory-Based Privilege Retention & Data Leakage: Agents cache credentials, keys, or retrieved data and reuse them inappropriately.'
+  - 'Cross-Agent Trust Exploitation (Confused Deputy): A compromised low-privilege agent relays instructions to a high-privilege
+    agent.'
+  - 'Time-of-Check to Time-of-Use (TOCTOU) in Agent Workflows: Permissions validated at start but change before execution.'
+  - 'Synthetic Identity Injection: Attackers impersonate internal agents using unverified descriptors.'
+  attack_scenarios:
+  - name: Delegated Privilege Abuse
+    description: A finance agent delegates to a 'DB query' agent but passes all its permissions. An attacker uses the inherited
+      access to exfiltrate HR and legal data.
+  - name: Memory-Based Escalation
+    description: An IT admin agent caches SSH credentials during a patch. Later a non-admin reuses the same session to create
+      an unauthorized account.
+  - name: Cross-Agent Trust Exploitation
+    description: A crafted email instructs an email sorting agent to tell a finance agent to move money. The finance agent
+      processes the fraudulent payment without verification.
+  - name: Device-code phishing across agents
+    description: An attacker shares a device-code link that a browsing agent follows; a separate 'helper' agent completes
+      the code, binding the victim's tenant to attacker scopes.
+  - name: Forged Agent Persona
+    description: An attacker registers a fake 'Admin Helper' agent in an internal Agent2Agent registry with a forged agent
+      card.
+  - name: Identity Sharing
+    description: An agent gains access to systems on behalf of a user, then allows other users to leverage that identity implicitly.
+  mitigations:
+  - 'Enforce Task-Scoped, Time-Bound Permissions: Issue short-lived, narrowly scoped tokens per task with permission boundaries.'
+  - 'Isolate Agent Identities and Contexts: Run per-session sandboxes with separated permissions and memory.'
+  - 'Mandate Per-Action Authorization: Re-verify each privileged step with a centralized policy engine.'
+  - 'Apply Human-in-the-Loop for Privilege Escalation: Require human approval for high-privilege or irreversible actions.'
+  - 'Define Intent: Bind OAuth tokens to a signed intent including subject, audience, purpose, and session.'
+  - 'Evaluate Agentic Identity Management Platforms: Use platforms like Microsoft Entra, AWS Bedrock Agents, Salesforce Agentforce.'
+  - Bind permissions to subject, resource, purpose, and duration with re-authentication on context switch.
+  - 'Detect Delegated and Transitive Permissions: Monitor indirect permission gains through delegation chains.'
+  - Detect abnormal cross-agent privilege elevation and device-code style phishing flows.
+  references:
+  - https://research.aimultiple.com/agentic-ai-cybersecurity/
+  - https://www.docker.com/blog/mcp-horror-stories-github-prompt-injection/
+  - https://css.csail.mit.edu/6.858/2015/readings/confused-deputy.html
+  - 15 Ways to Break Your Copilot, BHUSA 2024
+  - NVD - cve-2025-31491
+- id: ASI04
+  title: Agentic Supply Chain Vulnerabilities
+  description: Agentic Supply Chain Vulnerabilities arise when agents, tools, and related artefacts they work with are provided
+    by third parties and may be malicious, compromised, or tampered with in transit. Unlike traditional AI or software supply
+    chains, agentic ecosystems often compose capabilities at runtime - loading external tools and agent personas dynamically
+    – thereby increasing the attack surface.
+  related_threats:
+  - T17 Supply Chain Compromise
+  - T2 Tool Misuse
+  - T11 Unexpected RCE
+  - T12 Agent Communication Poisoning
+  - T13 Rogue Agent
+  - T16 Insecure Inter-Agent Protocol Abuse
+  related_llm_entries:
+  - LLM03:2025 Supply Chain Vulnerabilities
+  aivss_core_risk: Agent Supply Chain & Dependency Attacks
+  common_examples:
+  - 'Poisoned prompt templates loaded remotely: An agent pulls prompt templates containing hidden malicious instructions.'
+  - 'Tool-descriptor injection: An attacker embeds hidden instructions in a tool''s metadata or MCP/agent-card.'
+  - 'Impersonation and typo squatting: Agent is deceived by look-alike tool/service names or symbol attacks.'
+  - 'Vulnerable Third-Party Agent: A third-party agent with unpatched vulnerabilities is invited into multi-agent workflows.'
+  - 'Compromised MCP / Registry Server: A malicious agent-management server serves tampered components.'
+  - 'Poisoned knowledge plugin: A popular RAG plugin fetches context from a seeded malicious indexer.'
+  attack_scenarios:
+  - name: Amazon Q Supply Chain Compromise
+    description: A poisoned prompt in the Q for VS Code repo ships in v1.84.0 to thousands before detection, showing how upstream
+      agent-logic tampering cascades.
+  - name: MCP Tool Descriptor Poisoning
+    description: A researcher shows a prompt injection in GitHub's MCP where a malicious public tool hides commands in its
+      metadata.
+  - name: Malicious MCP Server Impersonating Postmark
+    description: First in-the-wild malicious MCP server on npm, impersonating postmark-mcp and secretly BCC'ing emails to
+      the attacker.
+  - name: AgentSmith Prompt-Hub Proxy Attack
+    description: Prompt proxying exfiltrates data and hijacks response flows, manipulating dynamic orchestration.
+  - name: Compromised NPM package backdoor
+    description: A poisoned nx/debug release was automatically installed by coding agents, enabling hidden backdoor that exfiltrated
+      SSH keys.
+  - name: Agent-in-the-Middle via Agent Cards
+    description: A compromised peer advertises exaggerated capabilities in its agent card, intercepting privileged coordination
+      traffic.
+  mitigations:
+  - 'Provenance and SBOMs, AIBOMs: Sign and attest manifests, prompts, and tool definitions; maintain inventory of AI components.'
+  - 'Dependency gatekeeping: Allowlist and pin; scan for typosquats; verify provenance before install or activation.'
+  - 'Containment and builds: Run sensitive agents in sandboxed containers; require reproducible builds.'
+  - 'Secure prompts and memory: Put prompts, orchestration scripts, and memory schemas under version control.'
+  - 'Inter-agent security: Enforce mutual auth and attestation via PKI and mTLS; sign and verify all inter-agent messages.'
+  - 'Continuous validation and monitoring: Re-check signatures, hashes, and SBOMs at runtime.'
+  - 'Pinning: Pin prompts, tools, and configs by content hash and commit ID.'
+  - 'Supply chain kill switch: Implement emergency revocation mechanisms.'
+  - Zero-trust security model in application design.
+  references:
+  - https://www.bleepingcomputer.com/news/security/amazon-ai-coding-agent-hacked-to-inject-data-wiping-commands/
+  - https://invariantlabs.ai/blog/mcp-github-vulnerability
+  - Reconstructing a timeline for Amazon Q prompt infection
+  - https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/agent-in-the-middle-abusing-agent-cards-in-the-agent-2-agent-protocol-to-win-all-the-tasks/
+  - How an AI Agent Vulnerability in LangSmith Could Lead to Stolen API Keys - Noma Security
+- id: ASI05
+  title: Unexpected Code Execution (RCE)
+  description: Agentic systems - including popular vibe coding tools - often generate and execute code. Attackers exploit
+    code-generation features or embedded tool access to escalate actions into remote code execution (RCE), local misuse, or
+    exploitation of internal systems. Because this code is often generated in real-time by the agent it can bypass traditional
+    security controls.
+  related_threats:
+  - T11 Unexpected RCE and Code Attacks
+  related_llm_entries:
+  - LLM01:2025 Prompt Injection
+  - LLM05:2025 Improper Output Handling
+  aivss_core_risk: Insecure Agent Critical Systems Interaction
+  common_examples:
+  - Prompt injection that leads to execution of attacker-defined code
+  - Code hallucination generating malicious or exploitable constructs
+  - Shell command invocation from reflected prompts
+  - Unsafe function calls, object deserialization, or code evaluation
+  - Use of exposed, unsanitized eval() functions powering agent memory
+  - Unverified or malicious package installs executing hostile code during installation
+  attack_scenarios:
+  - name: Replit 'Vibe Coding' Runaway Execution
+    description: During automated self-repair tasks, an agent generates and executes unreviewed install or shell commands,
+      deleting or overwriting production data.
+  - name: Direct Shell Injection
+    description: An attacker submits a prompt with embedded shell commands disguised as legitimate instructions, resulting
+      in unauthorized system access.
+  - name: Code Hallucination with Backdoor
+    description: A development agent tasked with generating security patches hallucinates code containing a hidden backdoor.
+  - name: Unsafe Object Deserialization
+    description: An agent generates a serialized object containing malicious payload data that triggers code execution when
+      deserialized.
+  - name: Multi-Tool Chain Exploitation
+    description: An attacker crafts a prompt causing the agent to invoke tools in sequence (file upload → path traversal →
+      dynamic code loading).
+  - name: Memory System RCE
+    description: An attacker exploits an unsafe eval() function in the agent's memory system by embedding executable code
+      within prompts.
+  - name: Agent-Generated RCE
+    description: An agent trying to patch a server is tricked into downloading and executing a vulnerable package for a reverse
+      shell.
+  - name: Dependency lockfile poisoning
+    description: The agent regenerates a lockfile from unpinned specs and pulls a backdoored minor version during 'fix build'
+      tasks.
+  mitigations:
+  - Follow LLM05:2025 Improper Output Handling mitigations with input validation and output encoding.
+  - Prevent direct agent-to-production systems with pre-production checks including security evaluations and adversarial unit
+    tests.
+  - 'Ban eval in production agents: Require safe interpreters, taint-tracking on generated code.'
+  - 'Execution environment security: Never run as root. Run code in sandboxed containers with strict limits.'
+  - 'Architecture and design: Isolate per-session environments with permission boundaries; apply least privilege.'
+  - 'Access control and approvals: Require human approval for elevated runs.'
+  - 'Code analysis and monitoring: Do static scans before execution; enable runtime monitoring.'
+  references:
+  - Cole Murray's demonstration of RCE via Waclaude memory exploitation
+  - 'GitHub Copilot: Remote Code Execution via Prompt Injection'
+  - https://positive.security/blog/auto-gpt-rce - RCE + container escape (Auto-GPT)
+- id: ASI06
+  title: Memory & Context Poisoning
+  description: Agentic systems rely on stored and retrievable information which can be a snapshot of its conversation history,
+    a memory tool or expanded context, which supports continuity across tasks and reasoning cycles. In Memory and Context
+    Poisoning, adversaries corrupt or seed this context with malicious or misleading data, causing future reasoning, planning,
+    or tool use to become biased, unsafe, or aid exfiltration.
+  related_threats:
+  - T1 Memory Poisoning
+  - T4 Memory Overload
+  - T6 Broken Goals
+  - T12 Shared Memory Poisoning
+  related_llm_entries:
+  - LLM01:2025 Prompt Injection
+  - LLM04:2025 Data and Model Poisoning
+  - LLM08:2025 Vector and Embedding Weaknesses
+  aivss_core_risk: Memory Use & Contextual Awareness
+  common_examples:
+  - 'RAG and embeddings poisoning: Malicious data enters the vector DB via poisoned sources or uploads.'
+  - 'Shared user context poisoning: Reused contexts let attackers inject data influencing later sessions.'
+  - 'Context-window manipulation: Crafted content injected into conversation is later summarized or persisted.'
+  - 'Long-term memory drift: Incremental exposure to subtly tainted data gradually shifts stored knowledge.'
+  - 'Systemic misalignment and backdoors: Poisoned memory shifts persona and plants trigger-based backdoors.'
+  - 'Cross-agent propagation: Contaminated context spreads between cooperating agents.'
+  attack_scenarios:
+  - name: Travel Booking Memory Poisoning
+    description: An attacker keeps reinforcing a fake flight price, the assistant stores it as truth, then approves bookings
+      at that price.
+  - name: Context Window Exploitation
+    description: The attacker splits attempts across sessions so earlier rejections drop out of context, eventually getting
+      admin access.
+  - name: Memory Poisoning for System
+    description: The attacker retrains a security AI's memory to label malicious activity as normal.
+  - name: Shared Memory Poisoning
+    description: The attacker inserts bogus refund policies into shared memory; other agents reuse them causing losses.
+  - name: Cross-tenant vector bleed
+    description: Near-duplicate content seeded by attacker exploits loose namespace filters, pulling another tenant's sensitive
+      chunk.
+  - name: Assistant Memory Poisoning
+    description: An attacker implants a user assistant's memory via Indirect Prompt Injection, compromising current and future
+      sessions.
+  mitigations:
+  - 'Baseline data protection: Encryption in transit and at rest combined with least-privilege access.'
+  - 'Content validation: Scan all new memory writes and model outputs for malicious or sensitive content.'
+  - 'Memory segmentation: Isolate user sessions and domain contexts to prevent leakage.'
+  - 'Access and retention: Allow only authenticated, curated sources; enforce context-aware access.'
+  - 'Provenance and anomalies: Require source attribution and detect suspicious updates.'
+  - Prevent automatic re-ingestion of agent's own generated outputs into trusted memory.
+  - 'Resilience and verification: Perform adversarial tests, use snapshots/rollback and version control.'
+  - Expire unverified memory to limit poison persistence.
+  - Weight retrieval by trust and tenancy.
+  references:
+  - https://arstechnica.com/security/2025/02/new-hack-uses-prompt-injection-to-corrupt-geminis-long-term-memory/
+  - https://www.bankinfosecurity.com/attackers-manipulate-ai-memory-to-spread-lies-a-27699
+  - https://arxiv.org/pdf/2402.07867 - Poisoned RAG
+  - https://arxiv.org/abs/2407.12784 - AgentPoison
+  - 'AgentFlayer: persistent 0click exploit on ChatGPT'
+  - Hacker plants false memories in ChatGPT to steal user data in perpetuity
+  - 'The Trifecta: How Three New Gemini Vulnerabilities Allowed Private Data Exfiltration'
+- id: ASI07
+  title: Insecure Inter-Agent Communication
+  description: Multi agent systems depend on continuous communication between autonomous agents that coordinate via APIs,
+    message buses, and shared memory, significantly expanding the attack surface. Insecure Inter-Agent Communication occurs
+    when these exchanges lack proper authentication, integrity, or semantic validation - allowing interception, spoofing,
+    or manipulation of agent messages and intents.
+  related_threats:
+  - T12 Agent Communication Poisoning
+  - T16 Insecure Inter-Agent Protocol Abuse
+  related_llm_entries:
+  - LLM02:2025 Sensitive Information Disclosure
+  - LLM06:2025 Excessive Agency
+  aivss_core_risk: Agent Memory & Context Manipulation
+  common_examples:
+  - 'Unencrypted channels enabling semantic manipulation: MITM intercepts and injects hidden instructions.'
+  - 'Message tampering leading to cross-context contamination: Modified messages blur task boundaries.'
+  - 'Replay on trust chains: Replayed delegation messages trick agents into granting access.'
+  - 'Protocol downgrade and descriptor forgery: Attackers coerce agents into weaker communication modes.'
+  - 'Message-routing attacks on discovery and coordination: Misdirected traffic forges malicious relationships.'
+  - 'Metadata analysis for behavioral profiling: Traffic patterns reveal decision cycles and relationships.'
+  attack_scenarios:
+  - name: Semantic injection via unencrypted communications
+    description: Over HTTP, a MITM attacker injects hidden instructions causing agents to produce biased results.
+  - name: Trust poisoning via message tampering
+    description: In an agentic trading network, altered reputation messages skew which agents are trusted.
+  - name: Context confusion via replay
+    description: Replayed emergency coordination messages trigger outdated procedures.
+  - name: Goal manipulation via protocol downgrade
+    description: Forced legacy, unencrypted mode lets attackers inject objectives and risk parameters.
+  - name: Agent-in-the-Middle via MCP descriptor poisoning
+    description: A malicious MCP endpoint advertises spoofed agent descriptors, routing sensitive data through attacker infrastructure.
+  - name: A2A registration spoofing
+    description: An attacker registers a fake peer agent in the discovery service using a cloned schema.
+  - name: Semantics split-brain
+    description: A single instruction is parsed into divergent intents by different agents, producing conflicting actions.
+  mitigations:
+  - 'Secure agent channels: Use end-to-end encryption with per-agent credentials and mutual authentication.'
+  - 'Message integrity and semantic protection: Digitally sign messages, hash payload and context.'
+  - 'Agent-aware anti-replay: Protect exchanges with nonces, session identifiers, and timestamps.'
+  - 'Protocol and capability security: Disable weak or legacy communication modes.'
+  - 'Limit metadata-based inference: Use fixed-size or padded messages, smooth communication rates.'
+  - 'Protocol pinning and version enforcement: Define and enforce allowed protocol versions.'
+  - 'Discovery and routing protection: Authenticate all discovery and coordination messages.'
+  - 'Attested registry and agent verification: Use registries with digital attestation.'
+  - 'Typed contracts and schema validation: Use versioned, typed message schemas.'
+  references:
+  - Local Model Poisoning Attacks to Byzantine-Robust Federated Learning - USENIX Security 2020
+  - 'Manipulating the Byzantine: Optimizing Model Poisoning Attacks and Defenses for Federated Learning - NDSS'
+  - Resilient Consensus Control for Multi-Agent Systems - MDPI / PMC
+- id: ASI08
+  title: Cascading Failures
+  description: Agentic cascading failures occur when a single fault (hallucination, malicious input, corrupted tool, or poisoned
+    memory) propagates across autonomous agents, compounding into system-wide harm. Because agents plan, persist, and delegate
+    autonomously, a single error can bypass stepwise human checks and persist in a saved state.
+  related_threats:
+  - T5 Cascading Hallucination Attacks
+  - T8 Repudiation and Untraceability
+  related_llm_entries:
+  - LLM01:2025 Prompt Injection
+  - LLM04:2025 Data and Model Poisoning
+  - LLM06:2025 Excessive Agency
+  aivss_core_risk: Agent Cascading Failures
+  common_examples:
+  - 'Planner–executor coupling: A hallucinating planner emits unsafe steps that executor automatically performs.'
+  - 'Corrupted persistent memory: Poisoned goals continue influencing new plans even after source is gone.'
+  - 'Inter-agent cascades from poisoned messages: A corrupted update causes peer agents to act on false alerts.'
+  - 'Cascading tool misuse and privilege escalation: One agent''s misuse leads downstream agents to repeat unsafe actions.'
+  - 'Auto-deployment cascade from tainted update: A poisoned release propagates to all connected agents.'
+  - 'Governance drift cascade: Human oversight weakens after repeated success; bulk approvals propagate drift.'
+  - 'Feedback-loop amplification: Two or more agents rely on each other''s outputs, magnifying errors.'
+  attack_scenarios:
+  - name: Financial trading cascade
+    description: Prompt injection poisons a Market Analysis agent, inflating risk limits; Position and Execution agents auto-trade
+      larger positions.
+  - name: Healthcare protocol propagation
+    description: Supply chain tampering corrupts drug data; Treatment auto-adjusts protocols, Care Coordination spreads them
+      network-wide.
+  - name: Cloud orchestration breakdown
+    description: Poisoning in Resource Planning adds unauthorized permissions; Security applies them, Deployment provisions
+      backdoored infrastructure.
+  - name: Security operations compromise
+    description: Stolen credentials make detection mark real alerts false, IR disables controls and purges logs.
+  - name: Manufacturing QC failure
+    description: Memory injection makes QC approve defects; Inventory and Scheduling optimize on bad data.
+  - name: Auto-remediation feedback loop
+    description: A remediation agent suppresses alerts to meet SLAs; planning agent widens automation, compounding blind spots.
+  - name: Regional cloud DNS outage cascade
+    description: A hyperscaler DNS outage simultaneously breaks multiple AI services across many organizations.
+  - name: Agentic Cyber defense cascade
+    description: Propagation of hallucinated imminent attack causes catastrophic defensive actions like shutdowns.
+  mitigations:
+  - 'Zero-trust model in application design: Assume availability failure of LLM and agentic components.'
+  - 'Isolation and trust boundaries: Sandbox agents, least privilege, network segmentation.'
+  - 'JIT, one-time tool access with runtime checks: Issue short-lived, task-scoped credentials.'
+  - 'Independent policy enforcement: Separate planning and execution via external policy engine.'
+  - 'Output validation and human gates: Checkpoints and governance agents for high-risk propagation.'
+  - 'Rate limiting and monitoring: Detect fast-spreading commands and throttle on anomalies.'
+  - 'Implement blast-radius guardrails: Quotas, progress caps, circuit breakers.'
+  - 'Behavioral and governance drift detection: Track decisions vs baselines.'
+  - 'Digital twin replay and policy gating: Re-run recorded actions in isolated environment.'
+  - 'Logging and non-repudiation: Record all inter-agent messages in tamper-evident logs.'
+  references:
+  - https://sre.google/sre-book/addressing-cascading-failures/
+  - https://cwe.mitre.org/data/definitions/400.html
+- id: ASI09
+  title: Human-Agent Trust Exploitation
+  description: Intelligent agents can establish strong trust with human users through their natural language fluency, emotional
+    intelligence, and perceived expertise (anthropomorphism). Adversaries or misaligned designs may exploit this trust to
+    influence user decisions, extract sensitive information, or steer outcomes for malicious purposes. The agent acts as an
+    untraceable 'bad influence.'
+  related_threats:
+  - T7 Misaligned & Deceptive Behaviors
+  - T8 Repudiation & Untraceability
+  - T10 Overwhelming the Human in the Loop
+  related_llm_entries:
+  - LLM01:2025 Prompt Injection
+  - LLM05:2025 Improper Output Handling
+  - LLM06:2025 Excessive Agency
+  - LLM09:2025 Misinformation
+  aivss_core_risk: Agent Untraceability / Human Manipulation
+  common_examples:
+  - 'Insufficient Explainability: Opaque reasoning forces users to trust outputs they cannot question.'
+  - 'Missing Confirmation for Sensitive Actions: Lack of verification converts user trust into immediate execution.'
+  - 'Emotional Manipulation: Anthropomorphic agents exploit emotional trust to persuade disclosure or unsafe actions.'
+  - 'Fake Explainability: The agent fabricates convincing rationales that hide malicious logic.'
+  attack_scenarios:
+  - name: Helpful Assistant Trojan
+    description: A compromised coding assistant suggests a slick one-line fix that runs a malicious script.
+  - name: Credential harvesting via contextual deception
+    description: A prompt-injected IT support agent targets a new hire, cites real tickets to appear legit, then captures
+      credentials.
+  - name: Invoice Copilot Fraud
+    description: A poisoned vendor invoice is ingested by the finance copilot which suggests urgent payment to attacker bank
+      details.
+  - name: Explainability Fabrications
+    description: The agent fabricates plausible audit rationales to justify a risky configuration change.
+  - name: Weaponized Explainability → Production Outage
+    description: A hijacked agent fabricates a convincing rationale to trick an analyst into approving deletion of a live
+      database.
+  - name: Consent laundering through 'read-only' previews
+    description: A preview pane triggers webhook side effects on open, exploiting users' mental model of read-only review.
+  - name: Fraudulent payment advice
+    description: A finance copilot poisoned by a manipulated invoice recommends urgent payment to attacker-controlled bank.
+  - name: Clinical decision manipulation
+    description: A care assistant influenced by biased information recommends an inappropriate drug dosage adjustment.
+  mitigations:
+  - 'Explicit confirmations: Require multi-step approval or ''human in the loop'' before sensitive operations.'
+  - 'Immutable logs: Keep tamper-proof records of user queries and agent actions.'
+  - 'Behavioral detection: Monitor sensitive data exposure and risky action executions over time.'
+  - 'Allow reporting of suspicious interactions: Provide clear option for users to flag suspicious behavior.'
+  - 'Adaptive Trust Calibration: Continuously adjust autonomy level based on contextual risk scoring.'
+  - 'Content provenance and policy enforcement: Attach verifiable metadata to all recommendations.'
+  - 'Separate preview from effect: Block state-changing calls during preview context.'
+  - 'Human-factors and UI safeguards: Visually differentiate high-risk recommendations.'
+  - 'Plan-divergence detection: Compare agent action sequences against approved workflow baselines.'
+  references:
+  - https://thehackernews.com/2025/06/zero-click-ai-vulnerability-exposes.html
+  - https://www.sciencedirect.com/science/article/pii/S266638992400103X
+  - https://arxiv.org/abs/2401.05566
+  - https://www.aisi.gov.uk/research/why-human-ai-relationships-need-socioaffective-alignment-2
+  - https://doi.org/10.1007/s00146-025-02422-7
+  - M365 Copilot manipulated to influence users to bad an ill-advised wire transfer
+- id: ASI10
+  title: Rogue Agents
+  description: Rogue Agents are malicious or compromised AI Agents that deviate from their intended function or authorized
+    scope, acting harmfully, deceptively, or parasitically within multi-agent or human-agent ecosystems. The agent's actions
+    may individually appear legitimate, but its emergent behavior becomes harmful, creating a containment gap for traditional
+    rule-based systems.
+  related_threats:
+  - T13 Rogue Agents in Multi-Agent Systems
+  - T14 Human Attacks on Multi-Agent Systems
+  - T15 Human Manipulation
+  related_llm_entries:
+  - LLM02:2025 Sensitive Information Disclosure
+  - LLM09:2025 Misinformation
+  aivss_core_risk: Behavioral Integrity (BI), Operational Security (OS), Compliance Violations (CV)
+  common_examples:
+  - 'Goal Drift and Scheming: Agents deviate from intended objectives, appearing compliant but pursuing hidden goals.'
+  - 'Workflow Hijacking: Rogue agents seize control of established workflows to redirect processes.'
+  - 'Collusion and Self-Replication: Agents coordinate to amplify manipulation or autonomously propagate.'
+  - 'Reward Hacking and Optimization Abuse: Agents game reward systems by exploiting flawed metrics.'
+  attack_scenarios:
+  - name: Autonomous data exfiltration after indirect prompt injection
+    description: After encountering a poisoned web instruction, the agent continues independently scanning and transmitting
+      sensitive files even after the malicious source is removed.
+  - name: Impersonated Observer Agent (Integrity Violation)
+    description: An attacker injects a fake review or approval agent into a multi-agent workflow, misleading a payment processing
+      agent.
+  - name: Self-Replication via Provisioning APIs
+    description: A compromised automation agent spawns unauthorized replicas across the network, prioritizing persistence.
+  - name: Reward Hacking → Critical Data Loss
+    description: Agents tasked with minimizing cloud costs learn that deleting production backups achieves their goal.
+  mitigations:
+  - 'Governance & Logging: Maintain comprehensive, immutable and signed audit logs of all agent actions.'
+  - 'Isolation & Boundaries: Assign Trust Zones with strict inter-zone communication rules and sandboxed execution.'
+  - 'Monitoring & Detection: Deploy behavioral detection and watchdog agents to validate peer behavior.'
+  - 'Containment & Response: Implement kill-switches and credential revocation to instantly disable rogue agents.'
+  - 'Identity Attestation and Behavioral Integrity Enforcement: Implement per-agent cryptographic identity attestation.'
+  - 'Require periodic behavioral attestation: Challenge tasks, signed bill of materials for prompts and tools.'
+  - 'Recovery and Reintegration: Establish trusted baselines for restoring quarantined agents.'
+  references:
+  - https://arxiv.org/abs/2503.12188 - Multi-Agent Systems Execute Arbitrary Malicious Code
+  - https://arxiv.org/abs/2502.05986 - Preventing Rogue Agents Improves Multi-Agent Collaboration
