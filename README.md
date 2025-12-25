@@ -159,38 +159,6 @@ def analyze_component(component_type, data):
     return relevant_threats
 ```
 
-## 📁 Repository Structure
-
-```
-owasp-agentic-security-dataset/
-├── README.md
-├── LICENSE
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── requirements.txt
-├── pyproject.toml
-├── .gitignore
-├── src/
-│   └── owasp_agentic_parser.py    # Parser script
-├── data/
-│   ├── owasp_agentic_top10_full.json
-│   ├── owasp_agentic_top10_full.yaml
-│   ├── owasp_agentic_top10_entries.json
-│   ├── owasp_agentic_top10_entries.yaml
-│   ├── owasp_agentic_top10_mappings.json
-│   ├── owasp_agentic_top10_mappings.yaml
-│   ├── owasp_agentic_top10_simplified.json
-│   └── owasp_agentic_top10_simplified.yaml
-├── examples/
-│   ├── threat_modeling.py
-│   ├── rule_generation.py
-│   └── compliance_mapping.py
-├── tests/
-│   └── test_parser.py
-└── docs/
-    ├── SCHEMA.md
-    └── MAPPINGS.md
-```
 
 ## 🔗 Related Resources
 
